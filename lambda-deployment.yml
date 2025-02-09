@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy Lambda function to reverse input
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ReverseInputLambda
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Code:
+        S3Bucket: jp-lambda-tests
+        S3Key: testLambda.zip
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  LambdaAPIGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ReverseTestAPI
+
+  LambdaAPIGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt LambdaAPIGateway.RootResourceId
+      PathPart: reverse
+      RestApiId: !Ref LambdaAPIGateway
+
+  LambdaAPIGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      ResourceId: !Ref LambdaAPIGatewayResource
+      RestApiId: !Ref LambdaAPIGateway
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: 
+            - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArn}/invocations"
+            - LambdaFunctionArn: !GetAtt LambdaFunction.Arn
+
+  LambdaPermissionForAPIGateway:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub:
+          - "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiId}/*/*/reverse"
+          - ApiId: !Ref LambdaAPIGateway
+
+  LambdaAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref LambdaAPIGateway
+      StageName: default
+    DependsOn:
+      - LambdaAPIGatewayMethod
+      - LambdaAPIGatewayResource
