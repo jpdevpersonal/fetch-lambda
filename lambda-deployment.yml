@@ -1,19 +1,25 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy Lambda function to reverse input
+Description: A simple Lambda function that returns Hello World
 
 Resources:
-  LambdaExecutionRole:
+  # -------------------------------
+  # IAM Role for Lambda Execution
+  # -------------------------------
+  MyLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: MyLambdaExecutionRole
+      # The trust policy that allows AWS Lambda to assume this role.
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
-              Service: lambda.amazonaws.com
+              Service: lambda.amazonaws.com  # Only Lambda can assume this role.
             Action: sts:AssumeRole
+      # Inline policies attached to this role.
       Policies:
-        - PolicyName: LambdaExecutionPolicy
+        - PolicyName: LambdaLoggingPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -22,23 +28,28 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "arn:aws:logs:*:*:*"
+                Resource: "*"  # Grants access to all CloudWatch Logs resources.
 
+  # -------------------------------
+  # Lambda Function Resource
+  # -------------------------------
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: ReverseInputLambda
-      Runtime: nodejs18.x
-      Handler: index.handler
+      FunctionName: FetchLambda  # Name of the Lambda function in AWS.
       Code:
-        S3Bucket: jp-lambda-tests
-        S3Key: testLambda.zip
-      Role: !GetAtt LambdaExecutionRole.Arn
+        S3Bucket: jp-lambda-tests         # Your existing S3 bucket where the code is stored.
+        S3Key: fetch-lambda.zip            # The object key (file name) of your Lambda deployment package.
+      Handler: handler.handler              # Entry point in your code (index.js file exporting a function named handler).
+      Role: !GetAtt MyLambdaExecutionRole.Arn  # Retrieves the ARN of the execution role defined above.
+      Runtime: nodejs18.x                 # Runtime environment for your function.
+      Timeout: 10                         # Maximum allowed execution time in seconds.
+
 
   LambdaAPIGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: ReverseTestAPI
+      Name: FetchLambdaAPI
 
   LambdaAPIGatewayResource:
     Type: AWS::ApiGateway::Resource
