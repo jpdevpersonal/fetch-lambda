@@ -26,7 +26,7 @@ With this setup, each incoming SNS event record will result in a message being s
 
 # Example SNS JSON
 Below is a basic example of what the SNS event JSON might look like when your Lambda function is triggered by an SNS topic. This is the structure passed to your Lambda handler in the event parameter (of type SNSEvent in @types/aws-lambda):
-'''JSON
+```json
 {
   "Records": [
     {
@@ -58,7 +58,7 @@ Below is a basic example of what the SNS event JSON might look like when your La
     }
   ]
 }
-'''
+```
 
 # Key Fields
 Records: An array of records—each record corresponds to a single SNS message event.
