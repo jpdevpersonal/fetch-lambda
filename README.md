@@ -61,16 +61,20 @@ Below is a basic example of what the SNS event JSON might look like when your La
 ```
 
 # Key Fields
-Records: An array of records—each record corresponds to a single SNS message event.
-EventSource: Typically "aws:sns" indicating SNS is the source.
-EventSubscriptionArn: The ARN of the subscription.
-Sns: Details about the SNS message:
-MessageId: A unique identifier for the SNS message.
-Message: The actual content of the message.
-MessageAttributes: Any custom attributes sent alongside the message.
-TopicArn: The ARN of the SNS topic.
-Subject: (Optional) Subject of the notification.
-Timestamp: Time the message was published.
-UnsubscribeUrl: URL to unsubscribe this particular subscription.
-Signature, SignatureVersion, and SigningCertUrl are used for message authenticity verification (usually handled by SNS/Lambda internally).
-Your Lambda (with a handler signature like handler(event: SNSEvent)) will receive this payload under the event parameter.
+
+| **Field**                  | **Description**                                                                                                                                             |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Records`                  | An array of records—each record corresponds to a single SNS message event.                                                                                  |
+| `EventSource`              | Typically `"aws:sns"`, indicating SNS is the source.                                                                                                        |
+| `EventSubscriptionArn`     | The ARN of the subscription.                                                                                                                                |
+| `Sns`                      | Details about the SNS message:                                                                                                                              |
+| &emsp;`MessageId`          | A unique identifier for the SNS message.                                                                                                                    |
+| &emsp;`Message`            | The actual content of the message.                                                                                                                          |
+| &emsp;`MessageAttributes`  | Any custom attributes sent alongside the message.                                                                                                           |
+| &emsp;`TopicArn`           | The ARN of the SNS topic.                                                                                                                                   |
+| &emsp;`Subject`            | *(Optional)* Subject of the notification.                                                                                                                   |
+| &emsp;`Timestamp`          | Time the message was published.                                                                                                                             |
+| &emsp;`UnsubscribeUrl`     | URL to unsubscribe from this particular subscription.                                                                                                       |
+| `Signature`, `SignatureVersion`, `SigningCertUrl` | Used for message authenticity verification (usually handled by SNS/Lambda internally).                                               |
+| **Lambda Handling**        | Your Lambda (with a handler signature like `handler(event: SNSEvent)`) will receive this payload under the `event` parameter.                               |
+
