@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: A simple Lambda function that returns Hello World
+Description: A simple Lambda function that Logs a sns event to a cloudwatch log group.
 
 Resources:
   # -------------------------------
@@ -36,10 +36,10 @@ Resources:
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: FetchLambda  # Name of the Lambda function in AWS.
+      FunctionName: snsQLambda  # Name of the Lambda function in AWS.
       Code:
         S3Bucket: jp-lambda-tests         # Your existing S3 bucket where the code is stored.
-        S3Key: fetch-lambda.zip            # The object key (file name) of your Lambda deployment package.
+        S3Key: snsQLambda.zip            # The object key (file name) of your Lambda deployment package.
       Handler: handler.handler              # Entry point in your code (index.js file exporting a function named handler).
       Role: !GetAtt MyLambdaExecutionRole.Arn  # Retrieves the ARN of the execution role defined above.
       Runtime: nodejs18.x                 # Runtime environment for your function.
@@ -49,7 +49,7 @@ Resources:
   LambdaAPIGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: FetchLambdaAPI
+      Name: logFromSNSLambdaAPI
 
   LambdaAPIGatewayResource:
     Type: AWS::ApiGateway::Resource
