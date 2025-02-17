@@ -1,4 +1,5 @@
 import { SNSEvent } from "aws-lambda";
+
 // If you haven't installed v3 yet, run: npm install @aws-sdk/client-sqs
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
